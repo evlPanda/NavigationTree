@@ -1,0 +1,66 @@
+<style>
+
+.tree {
+    color: DarkSlateGrey;
+	font-size: 12px;
+    text-align: left;
+	background-color: white;
+	cursor: pointer;
+    width: 100%;
+    border: none;
+    padding: 5px 0px 5px 5px;
+	transition: 0.5s;
+}
+
+.tree:before {
+	content: url('%Image(PT_TREE_COLLAPSED)');
+    float: left;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.active:before {
+    content: url('%Image(PT_TREE_EXPANDED)');
+}
+
+.branch {
+    padding-left: 15px;
+    padding-top: 0px;
+    overflow: hidden;
+	max-height: 0;
+	transition: max-height 0.5s ease-in-out; 
+}
+
+.leafContainer {
+	white-space: nowrap;
+	margin-bottom: 5px;
+}
+.leafImage {
+	float: left;
+}
+.leafImage:before {
+	content: url('%Image(PSTREEMGR_ENDCONNECT)');
+	margin-left: 10px;
+	margin-right: 5px;
+}
+.leaf {
+    width: 90%;
+    font-size: smaller;
+	display: inline-block;
+	min-height: 20px;
+	border-spacing: 0px;
+	vertical-align: top;
+}
+.leafLink, .leafNoLink{
+	color: DarkSlateGrey; 
+	text-decoration: none;
+ 	white-space: normal;
+}
+.leafLink:hover {
+	text-decoration: underline;
+}
+.leafNoLink {
+	color: LightSlateGrey;
+}
+
+</style>
