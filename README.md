@@ -1,6 +1,8 @@
 # NavigationTree
 WorkCentre Navigation Tree. Replacement for the delivered one.
 
+![Navigation Tree](https://i.imgur.com/FKd6Q8h.png)
+
 The Tree Class is primarily used to generate an HTML tree, but you can use it to create trees of anything. CreateNode() can be overridden.
 
 The Tree Class uses the Model View Control pattern. 
