@@ -6,9 +6,9 @@ The Tree Class is primarily used to generate an HTML tree, but you can use it to
 The Tree Class uses the Model View Control pattern. 
 
 ```
-   :Utilities:Tree:Node  Model
-   :Utilities:Tree:HTML  View
-   :Utilities:Tree:Tree  Controller
+:Utilities:Tree:Node  Model
+:Utilities:Tree:HTML  View
+:Utilities:Tree:Tree  Controller
 ```
 
 Note that tree branches have a level, while leaves do not. (Node.level)
@@ -16,15 +16,15 @@ Leaves will always appear under the previous branch, before other branches.
 i.e. Sort your tree!
 
 ```
-	+ branch lev. 1
-    	- leaf
-		- leaf
-		+ branch lev. 2
-			- leaf
-			- leaf
-			+ branch lev. 3 
-				- leaf
-				- leaf
++ branch lev. 1
+  - leaf
+  - leaf
+  + branch lev. 2
+    - leaf
+    - leaf
+    + branch lev. 3 
+      - leaf
+      - leaf
 ```
 
 You can add infinite levels.
@@ -32,43 +32,44 @@ You can add infinite levels.
 Example use:
 
 ```
-	import RX_UTILS_PKG:Factory;
-	import RX_UTILS_PKG:NavigationTree:Tree;
+import NavigationTree:Tree;
 
-  Local RX_UTILS_PKG:Factory &Factory;
-	Local RX_UTILS_PKG:NavigationTree:Tree &Tree;
-	
-	&Factory = create RX_UTILS_PKG:Factory();
-	&Tree = &Factory.Build("Tree", null);
+Component NavigationTree:Tree &Tree;
 
-    &node = &Tree.GetNewNode("branch", 1);
-    &node.label = "Australia";             <<< country
-    &Tree.AddNode(&node);
+If &Tree <> Null Then
+   Return;
+End-If;
 
-    &node = &Tree.GetNewNode("branch", 2);
-    &node.label = "New South Wales";       <<< state
-    &Tree.AddNode(&node);
+&Tree = create NavigationTree:Tree();
 
-    &node = &Tree.GetNewNode("leaf", 0);
-    &node.label = "Sydney";                <<< city
-    &node.link = "www.sydney.com";
-    &Tree.AddNode(&node);
+&node = &Tree.getNewNode("branch", 1);
+&node.label = "Australia";
+&Tree.addNode(&node);
 
-    &node = &Tree.GetNewNode("leaf", 0);
-    &node.label = "Newcastle";             <<< city
-    &node.link = "www.newcastle.com";
-    &Tree.AddNode(&node);
+&node = &Tree.getNewNode("branch", 2);
+&node.label = "New South Wales";
+&Tree.addNode(&node);
 
-    &node = &Tree.GetNewNode("branch", 2);
-    &node.label = "Queensland";            <<< state
-    &Tree.AddNode(&node);
+&node = &Tree.getNewNode("leaf", 0);
+&node.label = "Sydney";
+&node.link = "www.sydney.com";
+&Tree.addNode(&node);
 
-    &node = &Tree.GetNewNode("leaf", 0);
-    &node.label = "Brisbane";              <<< city
-    &node.link = "www.brisbane.com";
-    &Tree.AddNode(&node);
+&node = &Tree.getNewNode("leaf", 0);
+&node.label = "Newcastle";
+&node.link = "www.newcastle.com";
+&Tree.addNode(&node);
 
-    SOME_RECORD.HTML_AREA.Value = &Tree.GetHTML();
+&node = &Tree.getNewNode("branch", 2);
+&node.label = "Queensland";
+&Tree.addNode(&node);
+
+&node = &Tree.getNewNode("leaf", 0);
+&node.label = "Brisbane";
+&node.link = "www.brisbane.com";
+&Tree.addNode(&node);
+
+A_RECORD.HTMLAREA.Value = &Tree.getHTML();
 
 ```
 
