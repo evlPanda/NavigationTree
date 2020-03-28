@@ -1,0 +1,172 @@
+class HTML
+   method HTML();
+   method GetHTML(&tree As array of any) Returns string;
+   property string Style;
+   property boolean UseUniqueIDs;
+private
+   method AddStyle();
+   method GenerateTree(&tree As array of any, &start As integer, &branchID As integer);
+   method AddJavaScript();
+   method TrackBranchLevel(&tree As array of any);
+   method GenerateBranchOrLeaf(&node As any);
+   method Branch(&node As any) Returns string;
+   method Leaf(&node As any) Returns string;
+   method IsEndOfBranch(&tree As array of any) Returns boolean;
+   method EndBranch(&tree As array of any);
+   method EndTree(&tree As array of any);
+   method Space() Returns string;
+   method AddUniqueIDToHTMLObjects();
+   instance string &html;
+   instance string &cr;
+   instance integer &i; /* at instance level for tree walk. */
+   instance integer &level; /* at instance level for tree walk. */
+end-class;
+
+method HTML
+   &cr = Char(13);
+   &Style = GetHTMLText(HTML.XX_STYLE_TREE_FOLDERS_2);
+   &UseUniqueIDs = True;
+end-method;
+
+method GetHTML
+   /+ &tree as Array of Any +/
+   /+ Returns String +/
+   %This.AddStyle();
+   %This.GenerateTree(&tree, 1, 0); /* tree */
+   %This.AddJavaScript();
+   %This.AddUniqueIDToHTMLObjects();
+   Return &html;
+end-method;
+
+method AddStyle
+   &html = &html | %This.Style | &cr | &cr;
+end-method;
+
+method GenerateTree
+   /+ &tree as Array of Any, +/
+   /+ &start as Integer, +/
+   /+ &branchID as Integer +/
+   For &i = &start To &tree.Len
+      Local any &node = &tree [&i];
+      %This.TrackBranchLevel(&tree);
+      %This.GenerateBranchOrLeaf(&node);
+      If %This.IsEndOfBranch(&tree) Then
+         %This.EndBranch(&tree);
+         Return;
+      End-If;
+      If &node.type = "branch" Then
+         %This.GenerateTree(&tree, &i + 1, &node.ID);
+      End-If;
+   End-For;
+   %This.EndTree(&tree);
+end-method;
+
+method AddJavaScript
+   &html = &html | GetHTMLText(HTML.XX_JS_TREE_2);
+end-method;
+
+method TrackBranchLevel
+   /+ &tree as Array of Any +/
+   If &tree [&i].type = "branch" Then
+      &level = &tree [&i].level;
+   End-If;
+end-method;
+
+method GenerateBranchOrLeaf
+   /+ &node as Any +/
+   Evaluate &node.type
+   When = "branch"
+      &html = &html | %This.Branch(&node);
+   When = "leaf"
+      &html = &html | %This.Leaf(&node);
+   End-Evaluate;
+end-method;
+
+method Branch
+   /+ &node as Any +/
+   /+ Returns String +/
+   Local string &space = %This.Space();
+   Local string &branch;
+   &branch = &space | "<!-- Level " | &level | " -->" | &cr;
+   If &node.expanded Then
+      &branch = &branch | &space | "<button class=""tree active"">" | &node.label | "</button>" | &cr;
+      &branch = &branch | &space | "<div class=""branch"" style=""max-height:2000px;"">" | &cr; 
+   Else
+      &branch = &branch | &space | "<button class=""tree"">" | &node.label | "</button>" | &cr;
+      &branch = &branch | &space | "<div class=""branch"">" | &cr;
+   End-If;
+   Return &branch;
+end-method;
+
+method Leaf
+   /+ &node as Any +/
+   /+ Returns String +/
+   Local string &leaf, &linkClass;
+   Local string &space = %This.Space();
+   Evaluate &node.linkEnabled
+   When = True
+      &linkClass = "leafLink";
+   When = False
+      &linkClass = "leafNoLink";
+   End-Evaluate;
+   &leaf = &leaf | &space | "  <div class=""leafContainer"">" | &cr;
+   &leaf = &leaf | &space | "    <div class=""leafImage"">&nbsp;</div>" | &cr;
+   &leaf = &leaf | &space | "    <div class=""leaf"">" | &cr;
+   &leaf = &leaf | &space | "      <a class=""" | &linkClass | """ href=""" | &node.link | """>" | &node.label | "</a>" | &cr;
+   &leaf = &leaf | &space | "    </div>" | &cr;
+   &leaf = &leaf | &space | "  </div>" | &cr;
+   Return &leaf;
+end-method;
+
+method IsEndOfBranch
+   /+ &tree as Array of Any +/
+   /+ Returns Boolean +/
+   /* Check to see if we need to end the current branch by looking ahead 1. */
+   If &i + 1 <= &tree.Len Then
+      If &tree [&i + 1].type = "branch" And
+            &tree [&i + 1].level <= &level Then
+         Return True;
+      End-If;
+   End-If;
+   Return False;
+end-method;
+
+method EndBranch
+   /+ &tree as Array of Any +/
+   Local integer &l;
+   For &l = &level To &tree [&i + 1].level Step - 1
+      &html = &html | Rept("  ", &l - 1) | "</div>" | &cr;
+   End-For;
+end-method;
+
+method EndTree
+   /+ &tree as Array of Any +/
+   If &i = &tree.Len + 1 Then /* end tree. */
+      Local integer &l;
+      For &l = &level To 1 Step - 1
+         &html = &html | Rept("  ", &l - 1) | "</div>" | &cr;
+      End-For;
+      &html = &html | &cr;
+   End-If;
+end-method;
+
+method Space
+   /+ Returns String +/
+   Return Rept("  ", &level - 1); /* keeps HTML clean. */
+end-method;
+
+/* When displayed in a page more than once, such as in a workcentre, the browser gets rightfully confused.
+   Give each tree and its elements unique ids. */
+method AddUniqueIDToHTMLObjects
+   If &UseUniqueIDs Then
+      Local string &uid;
+      SQLExec("select rawtohex(sys_guid()) from dual", &uid);
+      &html = Substitute(&html, ".tree", ".tree" | &uid);
+      &html = Substitute(&html, """tree""", """tree" | &uid | """");
+      &html = Substitute(&html, ".branch", ".branch" | &uid);
+      &html = Substitute(&html, """branch""", """branch" | &uid | """");
+      &html = Substitute(&html, ".active", ".active" | &uid);
+      &html = Substitute(&html, """active""", """active" | &uid | """");
+      &html = Substitute(&html, """tree active""", """tree" | &uid | " active" | &uid | """");
+   End-If;
+end-method;
