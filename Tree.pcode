@@ -1,0 +1,121 @@
+import XX_UTILS_PKG:NavigationTree:Node; /* Model. */
+import XX_UTILS_PKG:NavigationTree:HTML; /* View. */
+
+class Tree /* Controller. */
+   method Tree();
+   method getNewNode(&typeIn As string, &levelIn As number) Returns any;
+   method addNode(&nodeIn As any);
+   method getHTML() Returns string;
+   method getTreeAs(&type As string) Returns string; /* debugger. */
+   property string style;
+   property boolean useUniqueIDs;
+protected
+   method createNode() Returns any;
+   method createHTML() Returns any;
+private
+   method initNode(&type As string);
+   method createBranch();
+   method createLeaf();
+   method setCurrentLevelIDAsNodeID();
+   method setNodeParentID();
+   instance array of any &tree;
+   instance any &node;
+   instance integer &level;
+   instance number &currentID;
+   instance number &currentLevel;
+   instance array of number &currentLevelID;
+end-class;
+
+method Tree
+   &tree = CreateArray();
+   &currentID = 0;
+   &currentLevelID = CreateArrayRept(0, 0);
+   &useUniqueIDs = True;
+end-method;
+
+method getNewNode
+   /+ &typeIn as String, +/
+   /+ &levelIn as Number +/
+   /+ Returns Any +/
+   &level = &levelIn;
+   &node = %This.createNode();
+   %This.initNode(&typeIn);
+   If &node.type = "branch" Then
+      %This.createBranch();
+   Else
+      %This.createLeaf();
+   End-If;
+   Return &node;
+end-method;
+
+method addNode
+   /+ &nodeIn as Any +/
+   &tree.Push(&nodeIn);
+end-method;
+
+method getHTML
+   /+ Returns String +/
+   Local any &HTML = %This.createHTML();
+   If %This.style <> "" Then
+      &HTML.Style = %This.style;
+   End-If;
+   &HTML.UseUniqueIDs = &useUniqueIDs;
+   Return &HTML.GetHTML(&tree);
+end-method;
+
+method createNode
+   /+ Returns Any +/
+   Return create XX_UTILS_PKG:NavigationTree:Node();
+end-method;
+
+method createHTML
+   /+ Returns Any +/
+   Return create XX_UTILS_PKG:NavigationTree:HTML();
+end-method;
+
+method initNode
+   /+ &type as String +/
+   &currentID = &currentID + 1;
+   &node.ID = &currentID;
+   &node.type = &type;
+   &node.level = &level;
+end-method;
+
+method createBranch
+   &currentLevel = &level;
+   %This.setCurrentLevelIDAsNodeID();
+   %This.setNodeParentID();
+end-method;
+
+method createLeaf
+   &node.parentID = &currentLevelID [&currentLevel];
+end-method;
+
+method setCurrentLevelIDAsNodeID
+   If &currentLevelID.Find(&level) = 0 Then
+      &currentLevelID.Push(&level);
+   End-If;
+   &currentLevelID [&level] = &node.ID;
+end-method;
+
+method setNodeParentID
+   &node.parentID = 0;
+   If &level > 1 Then
+      &node.parentID = &currentLevelID [&level - 1];
+   End-If;
+end-method;
+
+method getTreeAs /* Used for debugging. */
+   /+ &type as String +/
+   /+ Returns String +/
+   Local string &br = "<br/>";
+   If &type = "text" Then
+      &br = Char(13);
+   End-If;
+   Local string &s;
+   Local integer &i;
+   For &i = 1 To &tree.Len
+      &s = &s | &tree [&i].ID | ", " | &tree [&i].parentID | ", " | &tree [&i].label | &br;
+   End-For;
+   Return &s;
+end-method;
