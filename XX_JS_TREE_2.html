@@ -1,0 +1,16 @@
+<script>
+var acc = document.getElementsByClassName("tree");
+var i;
+for (i = 0; i < acc.length; i++) {
+    acc[i].addEventListener("click", function() {
+        this.classList.toggle("active");
+        var branch = this.nextElementSibling;
+		if (branch.style.maxHeight == "2000px"){ 
+			branch.style.maxHeight = "0px";
+		} else {
+			branch.style.maxHeight = "2000px"; 
+			/* branch.style.maxHeight = branch.scrollHeight + "px"; << this would be better, does not work. */
+		}
+    });
+}
+</script>
