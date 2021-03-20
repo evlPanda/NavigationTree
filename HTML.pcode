@@ -89,10 +89,10 @@ method Branch
    Local string &branch;
    &branch = &space | "<!-- Level " | &level | " -->" | &cr;
    If &node.expanded Then
-      &branch = &branch | &space | "<button class=""tree active"">" | &node.label | "</button>" | &cr;
+      &branch = &branch | &space | "<button type='button' class=""tree active"">" | &node.label | "</button>" | &cr;
       &branch = &branch | &space | "<div class=""branch"" style=""max-height:2000px;"">" | &cr; 
    Else
-      &branch = &branch | &space | "<button class=""tree"">" | &node.label | "</button>" | &cr;
+      &branch = &branch | &space | "<button type='button' class=""tree"">" | &node.label | "</button>" | &cr;
       &branch = &branch | &space | "<div class=""branch"">" | &cr;
    End-If;
    Return &branch;
